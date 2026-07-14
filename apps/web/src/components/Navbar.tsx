@@ -18,7 +18,7 @@ export function Navbar({ searchQuery, onSearchChange }: NavbarProps) {
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <Link href="/" className="flex items-center space-x-2 font-bold text-xl text-pink-600">
           <Package className="h-6 w-6" />
-          <span>VibeCake</span>
+          <span>Cakeme:)</span>
         </Link>
 
         <div className="hidden md:flex flex-1 max-w-md mx-8">
@@ -66,9 +66,14 @@ export function Navbar({ searchQuery, onSearchChange }: NavbarProps) {
               </button>
             </div>
           ) : (
-            <Link href="/login" className="p-2 text-gray-600 hover:text-pink-600 transition-colors">
-              <User className="h-6 w-6" />
-            </Link>
+            <div className="flex items-center space-x-2">
+              <Link href="/signup" className="text-sm font-medium text-gray-600 hover:text-pink-600 transition-colors px-3">
+                Sign Up
+              </Link>
+              <Link href="/login" className="p-2 text-gray-600 hover:text-pink-600 transition-colors">
+                <User className="h-6 w-6" />
+              </Link>
+            </div>
           )}
         </div>
       </div>

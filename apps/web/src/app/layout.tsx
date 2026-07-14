@@ -4,7 +4,7 @@ import { CartProvider } from "@/context/CartContext";
 import { AuthProvider } from "@/context/AuthContext";
 
 export const metadata: Metadata = {
-  title: "VibeCake | Sweet Surprises",
+  title: "Cakeme:) | Sweet Surprises",
   description: "The best platform for birthday cakes and funny gifts.",
 };
 

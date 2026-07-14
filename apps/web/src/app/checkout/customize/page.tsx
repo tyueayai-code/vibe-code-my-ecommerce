@@ -2,13 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { generateQR, uploadVideo } from '@/lib/api';
+import { generateQR, uploadVideo, createOrder } from '@/lib/api';
 import DrawingCanvas from '@/components/DrawingCanvas';
 import { Heart, Video, Image as ImageIcon, Package, CheckCircle, Palette } from 'lucide-react';
 
 export default function CustomizePage() {
   const router = useRouter();
   const [step, setStep] = useState(1);
+  const [isFinished, setIsFinished] = useState(false);
   const [customization, setCustomization] = useState({
     packaging: {
       paper_type: 'Standard',
@@ -55,13 +56,10 @@ export default function CustomizePage() {
   };
 
   const handleFinish = async () => {
-    setLoadingQR(true); // reuse as general loading
+    setLoadingQR(true);
     try {
       const token = localStorage.getItem('token');
       const recipient = JSON.parse(localStorage.getItem('checkout_recipient') || '{}');
-      const { totalPrice } = JSON.parse(localStorage.getItem('vibe_cart_state') || '{}'); // Simplified access for MVP
-      
-      // If the CartContext isn't accessible here, we can just use the saved cart from localStorage
       const cart = JSON.parse(localStorage.getItem('vibe_cart') || '[]');
       const finalPrice = cart.reduce((sum: any, item: any) => sum + (item.price * item.quantity), 0) + 60;
 
@@ -77,12 +75,15 @@ export default function CustomizePage() {
 
       await createOrder(orderData, token!);
       
-      // Clear cart and storage
       localStorage.removeItem('checkout_recipient');
       localStorage.removeItem('vibe_cart');
       
-      alert('🎉 Order placed successfully! Your surprise is on the way.');
-      router.push('/');
+      // Success effect
+      // In a real app, use a valid sound file URL
+      // const audio = new Audio('/success.mp3');
+      // audio.play();
+      
+      setIsFinished(true);
     } catch (err) {
       alert('Order placement failed. Please try again.');
     } finally {
@@ -92,6 +93,22 @@ export default function CustomizePage() {
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4">
+      {isFinished && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 backdrop-blur-sm p-4 animate-in fade-in duration-300">
+          <div className="bg-white p-12 rounded-[3rem] shadow-2xl border-4 border-pink-200 text-center space-y-6 animate-in zoom-in-50 duration-700 max-w-md">
+            <div className="text-9xl animate-bounce">🎉</div>
+            <h2 className="text-4xl font-extrabold text-gray-900">Surprise Locked!</h2>
+            <p className="text-xl text-gray-600">Your luxury gift is prepared with love.</p>
+            <button 
+              onClick={() => router.push('/')}
+              className="w-full bg-pink-600 text-white px-8 py-4 rounded-2xl font-bold hover:bg-pink-700 active:scale-95 transition-all"
+            >
+              Back Home
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="max-w-3xl mx-auto space-y-8">
         <header className="text-center space-y-2">
           <h1 className="text-4xl font-extrabold text-gray-900">Make it <span className="text-pink-600">Special</span></h1>
@@ -192,8 +209,20 @@ export default function CustomizePage() {
                 </div>
 
                 <div className="space-y-4">
-                  <label className="block text-sm font-medium text-gray-700">Draw a Little Something</label>
-                  <DrawingCanvas onSave={handleDrawingSave} />
+                  <label className="block text-sm font-medium text-gray-700">Your Special Drawing</label>
+                  {customization.greeting_card.drawing_data ? (
+                    <div className="relative p-4 bg-white border-2 border-pink-100 rounded-3xl shadow-lg rotate-1 hover:rotate-0 transition-transform duration-300">
+                      <img src={customization.greeting_card.drawing_data} alt="Your Drawing" className="w-full rounded-2xl border border-pink-50" />
+                      <button 
+                        onClick={() => setCustomization(prev => ({ ...prev, greeting_card: { ...prev.greeting_card, drawing_data: '' } }))}
+                        className="absolute top-6 right-6 px-4 py-2 bg-pink-500 text-white font-bold rounded-xl shadow-md hover:bg-pink-600 transition-colors"
+                      >
+                        Edit
+                      </button>
+                    </div>
+                  ) : (
+                    <DrawingCanvas onSave={handleDrawingSave} />
+                  )}
                 </div>
               </div>
             </div>
